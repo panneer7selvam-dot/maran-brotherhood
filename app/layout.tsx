@@ -15,8 +15,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Maran Brotherhood",
   description: "Family Operating System",
-  manifest: "/manifest.json", 
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+    other: {
+      rel: "apple-touch-icon-precomposed",
+      url: "/icon.png",
+    },
+  },
+  themeColor: "#0f172a",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+};
 };
 
 export default function RootLayout({
