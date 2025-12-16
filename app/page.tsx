@@ -6,12 +6,12 @@ import {
   BookOpen, Shield, Battery, Users, 
   CheckCircle, Lock, Unlock, Flame,
   Trash2, Plus, X, Star, Smile, Frown, 
-  Thermometer, Activity, Brain, BicepsFlexed, RefreshCw
+  Thermometer, Activity, Brain, BicepsFlexed, RefreshCw,
+  ArrowUpCircle, AlertCircle
 } from 'lucide-react';
 
-// --- CONFIGURATION v6.1 ---
-
-const APP_VERSION = "v6.1"; // CHANGE THIS when you update to force a visual change
+// --- CONFIGURATION v7.0 ---
+const APP_VERSION = "v7.0 (Holistic)";
 
 const INITIAL_KIDS = [
   { 
@@ -35,20 +35,20 @@ const INITIAL_QUESTS = [
   { id: 4, title: 'Car/Bike Wash', type: 'JOB', reward: 20, xp: 50, icon: '🚗', desc: 'Hard Labor.' },
 ];
 
-const MOODS = [
-  { label: 'Happy', icon: '😄', advice: 'Great! Share your joy with someone.' },
-  { label: 'Angry', icon: '😡', advice: 'Protocol: Take 5 deep breaths. Count to 10.' },
-  { label: 'Sad', icon: '😢', advice: 'Protocol: Ask Dad for a hug. It is okay to cry.' },
-  { label: 'Scared', icon: '😨', advice: 'Protocol: Name one brave thing you did today.' },
-];
-
 const EXERCISES = [
   { id: 1, name: '10 Pushups', xp: 10, str: 5, icon: '💪' },
   { id: 2, name: '20 Jumping Jacks', xp: 10, str: 5, icon: '🏃' },
   { id: 3, name: '1 Min Plank', xp: 20, str: 10, icon: '🪵' },
 ];
 
-export default function MaranHeroApp() {
+const MOODS = [
+  { label: 'Happy', icon: '😄', advice: 'Great! Share your joy with someone.' },
+  { label: 'Angry', icon: '😡', advice: 'Protocol: Take 5 deep breaths. Count to 10.' },
+  { label: 'Sad', icon: '😢', advice: 'Protocol: Ask Dad for a hug. It is okay to cry.' },
+];
+
+export default function MaranHolisticApp() {
+  // --- STATE ---
   const [kids, setKids] = useState(INITIAL_KIDS);
   const [quests, setQuests] = useState(INITIAL_QUESTS);
   const [soulLogs, setSoulLogs] = useState<{id: number, kidId: string, text: string, mood: string, date: string}[]>([]);
@@ -57,30 +57,28 @@ export default function MaranHeroApp() {
   const [activeTab, setActiveTab] = useState('HERO'); 
   const [isParentMode, setIsParentMode] = useState(false);
   
+  // Modals
   const [showPinPad, setShowPinPad] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [showAddQuest, setShowAddQuest] = useState(false);
   const [newQuest, setNewQuest] = useState({ title: '', reward: 0, xp: 10, icon: '⭐', type: 'WORK' });
-  
   const [newLog, setNewLog] = useState('');
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   // --- PERSISTENCE ---
   useEffect(() => {
-    // Load v6.1 data. If not found, use INITIAL
-    const savedKids = localStorage.getItem('maran_kids_v6_1');
-    const savedQuests = localStorage.getItem('maran_quests_v6_1');
-    const savedLogs = localStorage.getItem('maran_logs_v6_1');
-    
+    const savedKids = localStorage.getItem('maran_kids_v7');
+    const savedQuests = localStorage.getItem('maran_quests_v7');
+    const savedLogs = localStorage.getItem('maran_logs_v7');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v6_1', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v6_1', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v6_1', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v7', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v7', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v7', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
@@ -94,9 +92,8 @@ export default function MaranHeroApp() {
     }
   };
 
-  // FACTORY RESET (Fixes "Not Updating" bugs)
   const factoryReset = () => {
-    if(confirm("RESET ALL DATA? This fixes bugs but deletes current progress.")) {
+    if(confirm("Factory Reset? This clears all data.")) {
         localStorage.clear();
         window.location.reload();
     }
@@ -107,8 +104,11 @@ export default function MaranHeroApp() {
       if (k.id !== id) return k;
       let newVal = (k[field as keyof typeof k] as number) + value;
       if (field === 'battery') newVal = Math.min(100, Math.max(0, newVal));
+      
+      // Level Up Logic (500 XP = 1 Level)
       let newLevel = k.level;
       if (field === 'xp') newLevel = Math.floor(newVal / 500) + 1;
+      
       return { ...k, [field]: newVal, level: newLevel };
     }));
   };
@@ -121,8 +121,8 @@ export default function MaranHeroApp() {
 
   const handleMoodSelect = (mood: any) => {
     setCurrentMoodAdvice(mood.advice);
-    updateStat(activeKid.id, 'eq', 2);
-    setTimeout(() => setCurrentMoodAdvice(null), 8000);
+    updateStat(activeKid.id, 'eq', 2); // EQ Gain
+    setTimeout(() => setCurrentMoodAdvice(null), 6000);
   };
 
   const addSoulLog = () => {
@@ -130,18 +130,17 @@ export default function MaranHeroApp() {
     const log = { id: Date.now(), kidId: activeKid.id, text: newLog, mood: 'Log', date: new Date().toLocaleDateString() };
     setSoulLogs([log, ...soulLogs]);
     setNewLog('');
-    updateStat(activeKid.id, 'eq', 5);
+    updateStat(activeKid.id, 'eq', 5); // EQ Gain
   };
 
   const handleAddQuest = () => {
     if (!newQuest.title) return;
-    const quest = { ...newQuest, id: Date.now(), desc: 'Custom Mission' };
-    setQuests([...quests, quest]);
+    setQuests([...quests, { ...newQuest, id: Date.now(), desc: 'Custom Mission' }]);
     setShowAddQuest(false);
   };
   
   const handleDeleteQuest = (id: number) => {
-    if (confirm('Delete mission?')) setQuests(quests.filter(q => q.id !== id));
+    if (confirm('Remove mission?')) setQuests(quests.filter(q => q.id !== id));
   };
 
   const getEvolvedAvatar = (base: string, level: number) => {
@@ -160,7 +159,7 @@ export default function MaranHeroApp() {
              <h2 className="text-xl font-bold mb-4">New Mission</h2>
              <input className="w-full bg-slate-800 p-3 rounded-lg mb-3 border border-slate-700" placeholder="Title" value={newQuest.title} onChange={e => setNewQuest({...newQuest, title: e.target.value})} />
              <div className="flex gap-2 mb-3">
-               <input type="number" className="w-1/2 bg-slate-800 p-3 rounded-lg border border-slate-700" placeholder="₹ Reward" value={newQuest.reward} onChange={e => setNewQuest({...newQuest, reward: Number(e.target.value)})} />
+               <input type="number" className="w-1/2 bg-slate-800 p-3 rounded-lg border border-slate-700" placeholder="Reward (₹)" value={newQuest.reward} onChange={e => setNewQuest({...newQuest, reward: Number(e.target.value)})} />
                <input type="number" className="w-1/2 bg-slate-800 p-3 rounded-lg border border-slate-700" placeholder="XP" value={newQuest.xp} onChange={e => setNewQuest({...newQuest, xp: Number(e.target.value)})} />
              </div>
              <button onClick={handleAddQuest} className="w-full bg-green-600 py-3 rounded-lg font-bold">Create</button>
@@ -207,6 +206,7 @@ export default function MaranHeroApp() {
         {/* --- SUPERHERO ID CARD --- */}
         <div className={`rounded-3xl p-1 bg-gradient-to-br ${activeKid.color} shadow-2xl relative`}>
            <div className="bg-slate-900/90 rounded-[22px] p-5 backdrop-blur-sm">
+             {/* Header */}
              <div className="flex justify-between items-start mb-6">
                 <div>
                    <div className="flex items-center gap-2 mb-1">
@@ -221,6 +221,7 @@ export default function MaranHeroApp() {
                 </div>
              </div>
 
+             {/* 4 PILLARS OF DEVELOPMENT */}
              <div className="grid grid-cols-4 gap-2 mb-4">
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
                    <Trophy size={16} className="mx-auto text-yellow-400 mb-1"/>
@@ -244,19 +245,27 @@ export default function MaranHeroApp() {
                 </div>
              </div>
 
-             {/* PARENT CONTROLS */}
+             {/* PARENT CONTROLS (POSITIVE ONLY) */}
              {isParentMode && (
-               <div className="grid grid-cols-4 gap-1">
-                 <button onClick={() => updateStat(activeKid.id, 'credits', 10)} className="bg-yellow-500/20 text-yellow-200 text-[10px] font-bold py-1 rounded">+₹10</button>
-                 <button onClick={() => updateStat(activeKid.id, 'str', 5)} className="bg-red-500/20 text-red-200 text-[10px] font-bold py-1 rounded">+STR</button>
-                 <button onClick={() => updateStat(activeKid.id, 'eq', 5)} className="bg-pink-500/20 text-pink-200 text-[10px] font-bold py-1 rounded">+EQ</button>
-                 <button onClick={() => updateStat(activeKid.id, 'battery', -10)} className="bg-slate-700 text-white text-[10px] font-bold py-1 rounded">-Batt</button>
+               <div className="space-y-2">
+                 <div className="text-[10px] text-slate-500 uppercase font-bold text-center">Admin Controls</div>
+                 <div className="grid grid-cols-4 gap-1">
+                    <button onClick={() => updateStat(activeKid.id, 'credits', 10)} className="bg-yellow-500/20 text-yellow-200 text-[10px] font-bold py-2 rounded">+₹10</button>
+                    <button onClick={() => updateStat(activeKid.id, 'str', 5)} className="bg-red-500/20 text-red-200 text-[10px] font-bold py-2 rounded">+STR</button>
+                    <button onClick={() => updateStat(activeKid.id, 'eq', 5)} className="bg-pink-500/20 text-pink-200 text-[10px] font-bold py-2 rounded">+EQ</button>
+                    <button onClick={() => updateStat(activeKid.id, 'xp', 20)} className="bg-blue-500/20 text-blue-200 text-[10px] font-bold py-2 rounded">+XP</button>
+                 </div>
+                 {/* Battery Control (The Consequence) */}
+                 <div className="flex gap-2">
+                    <button onClick={() => updateStat(activeKid.id, 'battery', -20)} className="flex-1 bg-red-900/40 text-red-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><AlertCircle size={10}/> Drain (Tired)</button>
+                    <button onClick={() => updateStat(activeKid.id, 'battery', 20)} className="flex-1 bg-green-900/40 text-green-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Zap size={10}/> Recharge</button>
+                 </div>
                </div>
              )}
            </div>
         </div>
 
-        {/* HERO TAB */}
+        {/* HERO TAB (Habits) */}
         {activeTab === 'HERO' && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Daily Protocol</h2>
@@ -279,7 +288,7 @@ export default function MaranHeroApp() {
           </div>
         )}
 
-        {/* DOJO TAB */}
+        {/* DOJO TAB (Physical) */}
         {activeTab === 'DOJO' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-2xl text-center mb-6">
@@ -305,7 +314,7 @@ export default function MaranHeroApp() {
            </div>
         )}
 
-        {/* MIND TAB */}
+        {/* MIND TAB (Emotional) */}
         {activeTab === 'MIND' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl text-center mb-6">
@@ -313,7 +322,7 @@ export default function MaranHeroApp() {
                  <h2 className="text-xl font-black text-indigo-100 uppercase italic">Emotion Lab</h2>
               </div>
               <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-6">
-                 <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 text-center">Mood Scanner</h3>
+                 <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 text-center">How do you feel?</h3>
                  <div className="flex justify-between gap-2">
                     {MOODS.map(m => (
                        <button key={m.label} onClick={() => handleMoodSelect(m)} className="flex-1 flex flex-col items-center bg-slate-800 p-3 rounded-xl border border-slate-700">
@@ -338,12 +347,13 @@ export default function MaranHeroApp() {
            </div>
         )}
 
-        {/* GUILD TAB */}
+        {/* GUILD TAB (Work) */}
         {activeTab === 'GUILD' && (
            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-              {isParentMode && <button onClick={() => setShowAddQuest(true)} className="w-full border-2 border-dashed border-slate-700 p-3 rounded-xl flex items-center justify-center gap-2 text-slate-400 mb-2"><Plus size={16}/> <span className="font-bold text-xs">New Mission</span></button>}
+              {isParentMode && <button onClick={() => setShowAddQuest(true)} className="w-full border-2 border-dashed border-slate-700 p-3 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-900 hover:text-white transition mb-2"><Plus size={16}/> <span className="font-bold text-xs">New Mission</span></button>}
+              
               {quests.map(q => (
-                <div key={q.id} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+                <div key={q.id} className={`bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between ${activeKid.battery < 30 ? 'opacity-40 pointer-events-none grayscale' : ''}`}>
                    <div className="flex items-center gap-4">
                       <div className="h-12 w-12 bg-slate-800 rounded-xl flex items-center justify-center text-2xl border border-slate-700">{q.icon}</div>
                       <div>
@@ -362,14 +372,19 @@ export default function MaranHeroApp() {
                    ) : <Lock size={16} className="text-slate-600"/>}
                 </div>
               ))}
+              {activeKid.battery < 30 && (
+                <div className="text-center text-red-500 text-xs font-bold mt-4 p-2 bg-red-900/20 rounded-lg">
+                   ⚠️ Battery Critical. Rest to unlock Missions.
+                </div>
+              )}
            </div>
         )}
       
-      {/* RESET BUTTON (IN PARENT MODE ONLY, BOTTOM OF SCREEN) */}
+      {/* FOOTER */}
       {isParentMode && (
           <div className="text-center mt-10 opacity-50">
               <button onClick={factoryReset} className="text-[10px] text-red-500 flex items-center justify-center gap-1 mx-auto border border-red-900 p-2 rounded">
-                  <RefreshCw size={10} /> Reset App Data
+                  <RefreshCw size={10} /> Reset Data
               </button>
               <p className="text-[8px] text-slate-600 mt-1">System {APP_VERSION}</p>
           </div>
@@ -380,9 +395,9 @@ export default function MaranHeroApp() {
       {/* BOTTOM NAV */}
       <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md border border-slate-700 p-2 rounded-2xl flex justify-between shadow-2xl z-50">
         {[
-          { id: 'HERO', icon: <Crown size={20} />, label: 'Base' },
+          { id: 'HERO', icon: <Crown size={20} />, label: 'Hero' },
           { id: 'DOJO', icon: <BicepsFlexed size={20} />, label: 'Dojo' },
-          { id: 'MIND', icon: <Brain size={20} />, label: 'Lab' },
+          { id: 'MIND', icon: <Brain size={20} />, label: 'Mind' },
           { id: 'GUILD', icon: <Zap size={20} />, label: 'Guild' },
         ].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${activeTab === tab.id ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'}`}>
