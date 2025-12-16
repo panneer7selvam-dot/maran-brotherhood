@@ -7,32 +7,41 @@ import {
   CheckCircle, Lock, Unlock, Flame,
   Trash2, Plus, X, Star, Smile, Frown, 
   Thermometer, Activity, Brain, BicepsFlexed, RefreshCw,
-  ArrowUpCircle, AlertCircle
+  AlertTriangle, ArrowUpCircle
 } from 'lucide-react';
 
-// --- CONFIGURATION v7.0 ---
-const APP_VERSION = "v7.0 (Holistic)";
+// --- CONFIGURATION ---
+const APP_VERSION = "v8.0 (Gold Standard)";
 
+// 1. STARTS AT ZERO (Psychology: Earned Success)
 const INITIAL_KIDS = [
   { 
     id: '1', name: 'Aniv', baseAvatar: '🦁', 
-    credits: 150, xp: 850, level: 5, str: 20, eq: 15,
-    battery: 80, streak: 4, dharma: { bed: false, plate: false, teeth: false }, 
+    credits: 0, xp: 0, level: 1, str: 10, eq: 10,
+    battery: 80, streak: 0, 
+    dharma: { bed: false, plate: false, teeth: false }, 
     color: 'from-blue-600 to-indigo-600'
   },
   { 
     id: '2', name: 'Thiru', baseAvatar: '🐯', 
-    credits: 50, xp: 420, level: 3, str: 10, eq: 10,
-    battery: 90, streak: 12, dharma: { bed: false, plate: false, teeth: false }, 
+    credits: 0, xp: 0, level: 1, str: 10, eq: 10,
+    battery: 80, streak: 0, 
+    dharma: { bed: false, plate: false, teeth: false }, 
     color: 'from-orange-500 to-red-600'
   }
 ];
 
 const INITIAL_QUESTS = [
-  { id: 1, title: 'Homework Finished', type: 'MIND', reward: 0, xp: 20, icon: '🧠', desc: 'Mental Gym.' },
-  { id: 2, title: 'School Bag Ready', type: 'DUTY', reward: 0, xp: 10, icon: '🎒', desc: 'Preparation.' },
-  { id: 3, title: 'Fold Laundry', type: 'WORK', reward: 5, xp: 15, icon: '👕', desc: 'Help the base.' },
-  { id: 4, title: 'Car/Bike Wash', type: 'JOB', reward: 20, xp: 50, icon: '🚗', desc: 'Hard Labor.' },
+  // TIER 1: DUTY (No Money, Just XP/Habit)
+  { id: 1, title: 'School Bag Ready', type: 'DUTY', reward: 0, xp: 10, icon: '🎒', desc: 'Preparation.' },
+  { id: 2, title: 'Homework Done', type: 'MIND', reward: 0, xp: 20, icon: '📚', desc: 'Knowledge.' },
+  
+  // TIER 2: WORK (Money)
+  { id: 3, title: 'Fold Laundry', type: 'WORK', reward: 5, xp: 10, icon: '👕', desc: '10 items minimum.' },
+  { id: 4, title: 'Fill Bottles', type: 'WORK', reward: 5, xp: 5, icon: '💧', desc: 'All fridge bottles.' },
+  
+  // TIER 3: JOB (High Money)
+  { id: 5, title: 'Vehicle Wash', type: 'JOB', reward: 20, xp: 50, icon: '🚗', desc: 'Soap & Water clean.' },
 ];
 
 const EXERCISES = [
@@ -47,7 +56,7 @@ const MOODS = [
   { label: 'Sad', icon: '😢', advice: 'Protocol: Ask Dad for a hug. It is okay to cry.' },
 ];
 
-export default function MaranHolisticApp() {
+export default function MaranBrotherhoodFinal() {
   // --- STATE ---
   const [kids, setKids] = useState(INITIAL_KIDS);
   const [quests, setQuests] = useState(INITIAL_QUESTS);
@@ -61,29 +70,33 @@ export default function MaranHolisticApp() {
   const [showPinPad, setShowPinPad] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [showAddQuest, setShowAddQuest] = useState(false);
+  
+  // New Quest Form
   const [newQuest, setNewQuest] = useState({ title: '', reward: 0, xp: 10, icon: '⭐', type: 'WORK' });
+  
+  // Inputs
   const [newLog, setNewLog] = useState('');
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
-  // --- PERSISTENCE ---
+  // --- PERSISTENCE (Auto-Save) ---
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v7');
-    const savedQuests = localStorage.getItem('maran_quests_v7');
-    const savedLogs = localStorage.getItem('maran_logs_v7');
+    const savedKids = localStorage.getItem('maran_kids_v8');
+    const savedQuests = localStorage.getItem('maran_quests_v8');
+    const savedLogs = localStorage.getItem('maran_logs_v8');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v7', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v7', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v7', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v8', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v8', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v8', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
 
-  // --- ACTIONS ---
+  // --- CORE ACTIONS ---
   const handlePinSubmit = () => {
     if (pinInput === '1234') { 
       setIsParentMode(true); setShowPinPad(false); setPinInput('');
@@ -93,19 +106,19 @@ export default function MaranHolisticApp() {
   };
 
   const factoryReset = () => {
-    if(confirm("Factory Reset? This clears all data.")) {
+    if(confirm("RESET ALL? Credits will go to 0.")) {
         localStorage.clear();
         window.location.reload();
     }
-  }
+  };
 
   const updateStat = (id: string, field: string, value: number) => {
     setKids(kids.map(k => {
       if (k.id !== id) return k;
       let newVal = (k[field as keyof typeof k] as number) + value;
-      if (field === 'battery') newVal = Math.min(100, Math.max(0, newVal));
+      if (field === 'battery') newVal = Math.min(100, Math.max(0, newVal)); // Cap battery 0-100
       
-      // Level Up Logic (500 XP = 1 Level)
+      // Level Up Logic: Every 500 XP
       let newLevel = k.level;
       if (field === 'xp') newLevel = Math.floor(newVal / 500) + 1;
       
@@ -119,9 +132,25 @@ export default function MaranHolisticApp() {
     } : k));
   };
 
+  // --- EDITABLE MISSIONS (Admin) ---
+  const handleAddQuest = () => {
+    if (!newQuest.title) return;
+    const quest = { ...newQuest, id: Date.now(), desc: 'Custom Mission' };
+    setQuests([...quests, quest]);
+    setShowAddQuest(false);
+    setNewQuest({ title: '', reward: 0, xp: 10, icon: '⭐', type: 'WORK' }); // Reset form
+  };
+  
+  const handleDeleteQuest = (id: number) => {
+    if (confirm('Delete this mission permanently?')) {
+      setQuests(quests.filter(q => q.id !== id));
+    }
+  };
+
+  // --- EQ & LOGS ---
   const handleMoodSelect = (mood: any) => {
     setCurrentMoodAdvice(mood.advice);
-    updateStat(activeKid.id, 'eq', 2); // EQ Gain
+    updateStat(activeKid.id, 'eq', 2); // Small EQ reward
     setTimeout(() => setCurrentMoodAdvice(null), 6000);
   };
 
@@ -130,17 +159,7 @@ export default function MaranHolisticApp() {
     const log = { id: Date.now(), kidId: activeKid.id, text: newLog, mood: 'Log', date: new Date().toLocaleDateString() };
     setSoulLogs([log, ...soulLogs]);
     setNewLog('');
-    updateStat(activeKid.id, 'eq', 5); // EQ Gain
-  };
-
-  const handleAddQuest = () => {
-    if (!newQuest.title) return;
-    setQuests([...quests, { ...newQuest, id: Date.now(), desc: 'Custom Mission' }]);
-    setShowAddQuest(false);
-  };
-  
-  const handleDeleteQuest = (id: number) => {
-    if (confirm('Remove mission?')) setQuests(quests.filter(q => q.id !== id));
+    updateStat(activeKid.id, 'eq', 5); // Writing feels rewarding
   };
 
   const getEvolvedAvatar = (base: string, level: number) => {
@@ -152,23 +171,35 @@ export default function MaranHolisticApp() {
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white pb-28 select-none relative overflow-x-hidden">
       
-      {/* ADD QUEST MODAL */}
+      {/* MODAL: ADD MISSION */}
       {showAddQuest && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-700">
-             <h2 className="text-xl font-bold mb-4">New Mission</h2>
-             <input className="w-full bg-slate-800 p-3 rounded-lg mb-3 border border-slate-700" placeholder="Title" value={newQuest.title} onChange={e => setNewQuest({...newQuest, title: e.target.value})} />
-             <div className="flex gap-2 mb-3">
-               <input type="number" className="w-1/2 bg-slate-800 p-3 rounded-lg border border-slate-700" placeholder="Reward (₹)" value={newQuest.reward} onChange={e => setNewQuest({...newQuest, reward: Number(e.target.value)})} />
-               <input type="number" className="w-1/2 bg-slate-800 p-3 rounded-lg border border-slate-700" placeholder="XP" value={newQuest.xp} onChange={e => setNewQuest({...newQuest, xp: Number(e.target.value)})} />
+             <div className="flex justify-between items-center mb-4">
+               <h2 className="text-xl font-bold">Create Mission</h2>
+               <button onClick={() => setShowAddQuest(false)}><X size={20}/></button>
              </div>
-             <button onClick={handleAddQuest} className="w-full bg-green-600 py-3 rounded-lg font-bold">Create</button>
-             <button onClick={() => setShowAddQuest(false)} className="w-full mt-2 text-slate-500 text-xs">Cancel</button>
+             
+             <label className="text-[10px] text-slate-500 font-bold uppercase">Mission Title</label>
+             <input className="w-full bg-slate-800 p-3 rounded-lg mb-3 border border-slate-700" placeholder="e.g. Clean Fan" value={newQuest.title} onChange={e => setNewQuest({...newQuest, title: e.target.value})} />
+             
+             <div className="flex gap-2 mb-3">
+               <div className="w-1/2">
+                 <label className="text-[10px] text-slate-500 font-bold uppercase">Pay (₹)</label>
+                 <input type="number" className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700" value={newQuest.reward} onChange={e => setNewQuest({...newQuest, reward: Number(e.target.value)})} />
+               </div>
+               <div className="w-1/2">
+                 <label className="text-[10px] text-slate-500 font-bold uppercase">XP</label>
+                 <input type="number" className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700" value={newQuest.xp} onChange={e => setNewQuest({...newQuest, xp: Number(e.target.value)})} />
+               </div>
+             </div>
+             
+             <button onClick={handleAddQuest} className="w-full bg-green-600 py-3 rounded-lg font-bold">Save Mission</button>
           </div>
         </div>
       )}
 
-      {/* PIN PAD */}
+      {/* MODAL: PIN PAD */}
       {showPinPad && (
         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm text-center border border-slate-700">
@@ -203,10 +234,9 @@ export default function MaranHolisticApp() {
 
       <div className="max-w-lg mx-auto p-4 space-y-6">
 
-        {/* --- SUPERHERO ID CARD --- */}
+        {/* --- HERO CARD (The Dashboard) --- */}
         <div className={`rounded-3xl p-1 bg-gradient-to-br ${activeKid.color} shadow-2xl relative`}>
            <div className="bg-slate-900/90 rounded-[22px] p-5 backdrop-blur-sm">
-             {/* Header */}
              <div className="flex justify-between items-start mb-6">
                 <div>
                    <div className="flex items-center gap-2 mb-1">
@@ -221,7 +251,7 @@ export default function MaranHolisticApp() {
                 </div>
              </div>
 
-             {/* 4 PILLARS OF DEVELOPMENT */}
+             {/* 4 PILLARS */}
              <div className="grid grid-cols-4 gap-2 mb-4">
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
                    <Trophy size={16} className="mx-auto text-yellow-400 mb-1"/>
@@ -231,12 +261,12 @@ export default function MaranHolisticApp() {
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
                    <BicepsFlexed size={16} className="mx-auto text-red-400 mb-1"/>
                    <div className="text-xs font-bold">{activeKid.str}</div>
-                   <div className="text-[8px] text-slate-500 uppercase">STR</div>
+                   <div className="text-[8px] text-slate-500 uppercase">Body</div>
                 </div>
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
                    <Heart size={16} className="mx-auto text-pink-400 mb-1"/>
                    <div className="text-xs font-bold">{activeKid.eq}</div>
-                   <div className="text-[8px] text-slate-500 uppercase">EQ</div>
+                   <div className="text-[8px] text-slate-500 uppercase">Mind</div>
                 </div>
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
                    <Battery size={16} className={`mx-auto mb-1 ${activeKid.battery < 30 ? 'text-red-500' : 'text-green-400'}`}/>
@@ -245,27 +275,24 @@ export default function MaranHolisticApp() {
                 </div>
              </div>
 
-             {/* PARENT CONTROLS (POSITIVE ONLY) */}
+             {/* ADMIN CONTROLS (Only visible in Parent Mode) */}
              {isParentMode && (
-               <div className="space-y-2">
-                 <div className="text-[10px] text-slate-500 uppercase font-bold text-center">Admin Controls</div>
-                 <div className="grid grid-cols-4 gap-1">
-                    <button onClick={() => updateStat(activeKid.id, 'credits', 10)} className="bg-yellow-500/20 text-yellow-200 text-[10px] font-bold py-2 rounded">+₹10</button>
-                    <button onClick={() => updateStat(activeKid.id, 'str', 5)} className="bg-red-500/20 text-red-200 text-[10px] font-bold py-2 rounded">+STR</button>
-                    <button onClick={() => updateStat(activeKid.id, 'eq', 5)} className="bg-pink-500/20 text-pink-200 text-[10px] font-bold py-2 rounded">+EQ</button>
-                    <button onClick={() => updateStat(activeKid.id, 'xp', 20)} className="bg-blue-500/20 text-blue-200 text-[10px] font-bold py-2 rounded">+XP</button>
-                 </div>
-                 {/* Battery Control (The Consequence) */}
+               <div className="space-y-2 pt-2 border-t border-slate-800">
                  <div className="flex gap-2">
-                    <button onClick={() => updateStat(activeKid.id, 'battery', -20)} className="flex-1 bg-red-900/40 text-red-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><AlertCircle size={10}/> Drain (Tired)</button>
-                    <button onClick={() => updateStat(activeKid.id, 'battery', 20)} className="flex-1 bg-green-900/40 text-green-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Zap size={10}/> Recharge</button>
+                    {/* The Consequence Buttons */}
+                    <button onClick={() => updateStat(activeKid.id, 'battery', -20)} className="flex-1 bg-red-900/40 text-red-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><AlertTriangle size={10}/> Drain</button>
+                    <button onClick={() => updateStat(activeKid.id, 'battery', 20)} className="flex-1 bg-green-900/40 text-green-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Zap size={10}/> Boost</button>
+                    {/* The Positive Reinforcement */}
+                    <button onClick={() => updateStat(activeKid.id, 'streak', 1)} className="flex-1 bg-orange-900/40 text-orange-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Flame size={10}/> Streak</button>
                  </div>
                </div>
              )}
            </div>
         </div>
 
-        {/* HERO TAB (Habits) */}
+        {/* --- TABS CONTENT --- */}
+
+        {/* 1. HERO (Habits) */}
         {activeTab === 'HERO' && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Daily Protocol</h2>
@@ -277,6 +304,7 @@ export default function MaranHolisticApp() {
                  </div>
                  {activeKid.dharma.bed ? <CheckCircle size={24} className="text-green-500"/> : <div className="h-6 w-6 rounded-full border-2 border-slate-700"/>}
               </button>
+              
               <button onClick={() => toggleDharma('teeth')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between transition-all ${(activeKid.dharma as any).teeth ? 'bg-green-900/20 border-green-500/50' : 'bg-slate-950 border-slate-800'}`}>
                  <div className="flex items-center gap-3">
                     <div className="bg-slate-800 p-2 rounded-lg"><Shield size={18} className="text-blue-400"/></div>
@@ -288,17 +316,17 @@ export default function MaranHolisticApp() {
           </div>
         )}
 
-        {/* DOJO TAB (Physical) */}
+        {/* 2. DOJO (Body) */}
         {activeTab === 'DOJO' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-2xl text-center mb-6">
                  <BicepsFlexed size={32} className="mx-auto text-red-500 mb-2"/>
                  <h2 className="text-xl font-black text-red-100 uppercase italic">The Dojo</h2>
-                 <p className="text-xs text-red-300/70">"Pain is weakness leaving the body."</p>
+                 <p className="text-xs text-red-300/70">Build your body. Earn Strength.</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                  {EXERCISES.map(ex => (
-                    <div key={ex.id} className="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-red-500/50 transition">
+                    <div key={ex.id} className="bg-slate-900 p-4 rounded-xl border border-slate-800 relative">
                        <div className="text-2xl mb-2">{ex.icon}</div>
                        <div className="font-bold text-sm">{ex.name}</div>
                        <div className="text-[10px] text-slate-500 mt-1 flex gap-2">
@@ -314,7 +342,7 @@ export default function MaranHolisticApp() {
            </div>
         )}
 
-        {/* MIND TAB (Emotional) */}
+        {/* 3. MIND (Soul/EQ) */}
         {activeTab === 'MIND' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl text-center mb-6">
@@ -347,13 +375,20 @@ export default function MaranHolisticApp() {
            </div>
         )}
 
-        {/* GUILD TAB (Work) */}
+        {/* 4. GUILD (Work/Career) */}
         {activeTab === 'GUILD' && (
            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-              {isParentMode && <button onClick={() => setShowAddQuest(true)} className="w-full border-2 border-dashed border-slate-700 p-3 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-900 hover:text-white transition mb-2"><Plus size={16}/> <span className="font-bold text-xs">New Mission</span></button>}
               
+              {/* Add Mission Button (Admin Only) */}
+              {isParentMode && (
+                <button onClick={() => setShowAddQuest(true)} className="w-full border-2 border-dashed border-slate-700 p-3 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-900 hover:text-white transition mb-4">
+                  <Plus size={16}/> <span className="font-bold text-xs">Add New Job</span>
+                </button>
+              )}
+              
+              {/* Mission List */}
               {quests.map(q => (
-                <div key={q.id} className={`bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between ${activeKid.battery < 30 ? 'opacity-40 pointer-events-none grayscale' : ''}`}>
+                <div key={q.id} className={`bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between transition-all ${activeKid.battery < 30 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
                    <div className="flex items-center gap-4">
                       <div className="h-12 w-12 bg-slate-800 rounded-xl flex items-center justify-center text-2xl border border-slate-700">{q.icon}</div>
                       <div>
@@ -366,25 +401,27 @@ export default function MaranHolisticApp() {
                    </div>
                    {isParentMode ? (
                      <div className="flex gap-1">
-                        <button onClick={() => handleDeleteQuest(q.id)} className="p-2 text-slate-600"><Trash2 size={14}/></button>
+                        <button onClick={() => handleDeleteQuest(q.id)} className="p-2 text-slate-600 hover:text-red-500"><Trash2 size={16}/></button>
                         <button onClick={() => { updateStat(activeKid.id, 'credits', q.reward); updateStat(activeKid.id, 'xp', q.xp); }} className="bg-green-600 text-white px-3 py-1 rounded-lg font-bold text-xs">Approve</button>
                      </div>
                    ) : <Lock size={16} className="text-slate-600"/>}
                 </div>
               ))}
+
+              {/* Consequence Message */}
               {activeKid.battery < 30 && (
-                <div className="text-center text-red-500 text-xs font-bold mt-4 p-2 bg-red-900/20 rounded-lg">
-                   ⚠️ Battery Critical. Rest to unlock Missions.
+                <div className="text-center text-red-500 text-xs font-bold mt-4 p-3 bg-red-900/20 rounded-lg border border-red-500/50">
+                   ⚠️ BATTERY LOW: Work Permit Revoked. Rest to unlock.
                 </div>
               )}
            </div>
         )}
       
-      {/* FOOTER */}
+      {/* FOOTER: SYSTEM RESET */}
       {isParentMode && (
-          <div className="text-center mt-10 opacity-50">
-              <button onClick={factoryReset} className="text-[10px] text-red-500 flex items-center justify-center gap-1 mx-auto border border-red-900 p-2 rounded">
-                  <RefreshCw size={10} /> Reset Data
+          <div className="text-center mt-10 opacity-50 pb-4">
+              <button onClick={factoryReset} className="text-[10px] text-red-500 flex items-center justify-center gap-1 mx-auto border border-red-900 p-2 rounded hover:bg-red-900/20">
+                  <RefreshCw size={10} /> Factory Reset
               </button>
               <p className="text-[8px] text-slate-600 mt-1">System {APP_VERSION}</p>
           </div>
