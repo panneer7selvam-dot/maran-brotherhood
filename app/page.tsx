@@ -5,55 +5,49 @@ import {
   Zap, Trophy, Crown, Heart, ShoppingBag, 
   BookOpen, Shield, Battery, Users, 
   CheckCircle, Lock, Unlock, Flame,
-  Dumbbell, Swords, PlusCircle, Trash2,
-  Smile, Sun, Star, ThumbsUp
+  Trash2, Plus, X, Star, Smile, ThumbsUp
 } from 'lucide-react';
 
-// --- 1. REALISTIC ECONOMY CONFIGURATION ---
+// --- 1. REALISTIC DATA CONFIGURATION ---
+
 const INITIAL_KIDS = [
   { 
     id: '1', name: 'Aniv', baseAvatar: '🦁', credits: 150, xp: 850, level: 5, battery: 80, streak: 4, 
-    dharma: { bed: true, plate: false }, color: 'from-blue-600 to-indigo-600'
+    // Updated Dharma: Bed (Order), Plate (Manners), Teeth (Hygiene)
+    dharma: { bed: false, plate: false, teeth: false }, 
+    color: 'from-blue-600 to-indigo-600'
   },
   { 
     id: '2', name: 'Thiru', baseAvatar: '🐯', credits: 50, xp: 420, level: 3, battery: 90, streak: 12,
-    dharma: { bed: true, plate: true }, color: 'from-orange-500 to-red-600'
+    dharma: { bed: false, plate: false, teeth: false }, 
+    color: 'from-orange-500 to-red-600'
   }
 ];
 
 const INITIAL_QUESTS = [
-  // --- TIER 1: DUTY (0 Credits, XP Only) ---
-  { id: 1, title: 'Night Shift (Pack Bag)', type: 'DUTY', reward: 0, xp: 10, icon: '🎒', desc: 'Prepare for tomorrow.' },
-  { id: 2, title: 'Uniform & Shoes', type: 'DUTY', reward: 0, xp: 10, icon: '👔', desc: 'Polish shoes, hang uniform.' },
-  { id: 3, title: 'Homework Complete', type: 'DUTY', reward: 0, xp: 20, icon: '📝', desc: 'Finished before dinner.' },
+  // --- TIER 1: DUTY (0 Credits - The Bare Minimum) ---
+  { id: 1, title: 'Homework Finished', type: 'DUTY', reward: 0, xp: 20, icon: '📝', desc: 'Complete before dinner.' },
+  { id: 2, title: 'School Bag Ready', type: 'DUTY', reward: 0, xp: 10, icon: '🎒', desc: 'Packed for tomorrow.' },
 
-  // --- TIER 2: VALUE ADD (Low Pay, Helpful) ---
-  { id: 4, title: 'Water Plants', type: 'WORK', reward: 2, xp: 10, icon: '🌱', desc: 'Garden maintenance.' },
-  { id: 5, title: 'Fill Water Bottles', type: 'WORK', reward: 2, xp: 5, icon: '💧', desc: 'Fill all fridge bottles.' },
-  { id: 6, title: 'Dusting Furniture', type: 'WORK', reward: 5, xp: 15, icon: '🧹', desc: 'Living room sofa/table.' },
+  // --- TIER 2: HOUSE HELP (Low Pay - Motor Skills) ---
+  { id: 3, title: 'Fill Water Bottles', type: 'WORK', reward: 2, xp: 5, icon: '💧', desc: 'Fill all fridge bottles.' },
+  { id: 4, title: 'Fold Laundry', type: 'WORK', reward: 5, xp: 15, icon: '👕', desc: 'Fold 10 items of clothing.' },
+  { id: 5, title: 'Toy Sort', type: 'WORK', reward: 5, xp: 10, icon: '🧸', desc: 'Put all toys in correct bins.' },
 
-  // --- TIER 3: HARD LABOR (Real Pay) ---
-  { id: 7, title: 'Vehicle Wash', type: 'JOB', reward: 20, xp: 50, icon: '🚗', desc: 'Wash car/scooter with soap.' },
-  { id: 8, title: 'Head Massage for Dad', type: 'JOB', reward: 10, xp: 20, icon: '💆', desc: '10 minutes minimum.' },
+  // --- TIER 3: HARD LABOR (Real Pay - Effort) ---
+  { id: 6, title: 'Car/Bike Wash', type: 'JOB', reward: 20, xp: 50, icon: '🚗', desc: 'Wash with soap & water.' },
+  { id: 7, title: 'Clean Ceiling Fan', type: 'JOB', reward: 15, xp: 30, icon: '🧹', desc: 'Wipe dust (Ask Dad for help).' },
   
-  // --- TIER 4: IRON MIND (Resilience) ---
-  { id: 9, title: 'The Truth Bomb', type: 'IRON', reward: 0, xp: 100, icon: '💣', desc: 'Admit a mistake voluntarily.' },
-  { id: 10, title: 'No Sugar Day', type: 'IRON', reward: 5, xp: 50, icon: '🚫', desc: '0 sweets for 24 hours.' },
+  // --- TIER 4: IRON MIND (Character Building) ---
+  { id: 8, title: 'The Truth Bomb', type: 'IRON', reward: 0, xp: 100, icon: '💣', desc: 'Admit a mistake voluntarily.' },
 ];
 
-const PROMPTS = [
-  "What is one thing that made you smile today?",
-  "Who helped you today, and how?",
-  "What was a hard thing you did today?",
-  "Name one thing about our family you love.",
-  "What is a mistake you learned from?"
-];
-
-export default function MaranBrotherhoodReal() {
+export default function MaranBrotherhoodAdmin() {
   // --- STATE ---
   const [kids, setKids] = useState(INITIAL_KIDS);
   const [quests, setQuests] = useState(INITIAL_QUESTS);
   const [soulLogs, setSoulLogs] = useState<{id: number, kidId: string, text: string, mood: string, date: string}[]>([]);
+  
   const [selectedId, setSelectedId] = useState('1');
   const [activeTab, setActiveTab] = useState('HQ'); 
   const [isParentMode, setIsParentMode] = useState(false);
@@ -61,28 +55,33 @@ export default function MaranBrotherhoodReal() {
   // Modals
   const [showPinPad, setShowPinPad] = useState(false);
   const [pinInput, setPinInput] = useState('');
+  
+  // Add Quest State
+  const [showAddQuest, setShowAddQuest] = useState(false);
+  const [newQuest, setNewQuest] = useState({ title: '', reward: 0, xp: 10, icon: '⭐', type: 'WORK' });
+
+  // Soul Log State
   const [newLog, setNewLog] = useState({ text: '', mood: 'Happy' });
-  const [activePrompt, setActivePrompt] = useState(PROMPTS[0]);
 
   // --- PERSISTENCE ---
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v4');
-    const savedQuests = localStorage.getItem('maran_quests_v4');
-    const savedLogs = localStorage.getItem('maran_logs_v4');
+    const savedKids = localStorage.getItem('maran_kids_v5');
+    const savedQuests = localStorage.getItem('maran_quests_v5');
+    const savedLogs = localStorage.getItem('maran_logs_v5');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v4', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v4', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v4', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v5', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v5', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v5', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
 
-  // --- LOGIC ---
+  // --- ACTIONS ---
   const handlePinSubmit = () => {
     if (pinInput === '1234') { 
       setIsParentMode(true); setShowPinPad(false); setPinInput('');
@@ -96,34 +95,10 @@ export default function MaranBrotherhoodReal() {
       if (k.id !== id) return k;
       let newVal = (k[field as keyof typeof k] as number) + value;
       if (field === 'battery') newVal = Math.min(100, Math.max(0, newVal));
-      
-      // Level Logic: 500 XP = 1 Level
       let newLevel = k.level;
       if (field === 'xp') newLevel = Math.floor(newVal / 500) + 1;
-
       return { ...k, [field]: newVal, level: newLevel };
     }));
-  };
-
-  const addSoulLog = () => {
-    if(!newLog.text) return;
-    const log = {
-      id: Date.now(),
-      kidId: activeKid.id,
-      text: newLog.text,
-      mood: newLog.mood,
-      date: new Date().toLocaleDateString()
-    };
-    setSoulLogs([log, ...soulLogs]);
-    setNewLog({ text: '', mood: 'Happy' });
-    // Randomize prompt for next time
-    setActivePrompt(PROMPTS[Math.floor(Math.random() * PROMPTS.length)]);
-  };
-
-  const getEvolvedAvatar = (base: string, level: number) => {
-    if (level < 5) return base; 
-    if (level < 10) return `${base}⚔️`; 
-    return `${base}👑`; 
   };
 
   const toggleDharma = (task: string) => {
@@ -132,10 +107,97 @@ export default function MaranBrotherhoodReal() {
     } : k));
   };
 
+  // --- QUEST MANAGEMENT (ADD/DELETE) ---
+  const handleDeleteQuest = (id: number) => {
+    if (confirm('Are you sure you want to delete this mission?')) {
+      setQuests(quests.filter(q => q.id !== id));
+    }
+  };
+
+  const handleAddQuest = () => {
+    if (!newQuest.title) return;
+    const quest = {
+      id: Date.now(), // Unique ID
+      title: newQuest.title,
+      reward: Number(newQuest.reward),
+      xp: Number(newQuest.xp),
+      icon: newQuest.icon,
+      type: newQuest.type,
+      desc: 'Custom Mission'
+    };
+    setQuests([...quests, quest]);
+    setShowAddQuest(false);
+    setNewQuest({ title: '', reward: 0, xp: 10, icon: '⭐', type: 'WORK' });
+  };
+
+  const addSoulLog = () => {
+    if(!newLog.text) return;
+    const log = { id: Date.now(), kidId: activeKid.id, text: newLog.text, mood: newLog.mood, date: new Date().toLocaleDateString() };
+    setSoulLogs([log, ...soulLogs]);
+    setNewLog({ text: '', mood: 'Happy' });
+  };
+
+  const getEvolvedAvatar = (base: string, level: number) => {
+    if (level < 5) return base; 
+    if (level < 10) return `${base}⚔️`; 
+    return `${base}👑`; 
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white pb-24 select-none relative">
       
-      {/* PIN PAD */}
+      {/* --- MODAL: ADD QUEST --- */}
+      {showAddQuest && (
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+          <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">New Mission</h2>
+              <button onClick={() => setShowAddQuest(false)}><X size={20}/></button>
+            </div>
+            
+            <label className="text-xs text-slate-500 font-bold uppercase">Mission Title</label>
+            <input 
+              className="w-full bg-slate-800 p-3 rounded-lg mb-3 border border-slate-700 focus:border-blue-500 outline-none" 
+              placeholder="e.g. Wash Windows" 
+              value={newQuest.title} onChange={e => setNewQuest({...newQuest, title: e.target.value})}
+            />
+
+            <div className="flex gap-2 mb-3">
+              <div className="w-1/2">
+                <label className="text-xs text-slate-500 font-bold uppercase">Reward (₹)</label>
+                <input 
+                  type="number" className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700" 
+                  value={newQuest.reward} onChange={e => setNewQuest({...newQuest, reward: Number(e.target.value)})}
+                />
+              </div>
+              <div className="w-1/2">
+                <label className="text-xs text-slate-500 font-bold uppercase">XP</label>
+                <input 
+                  type="number" className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700" 
+                  value={newQuest.xp} onChange={e => setNewQuest({...newQuest, xp: Number(e.target.value)})}
+                />
+              </div>
+            </div>
+
+            <label className="text-xs text-slate-500 font-bold uppercase">Type</label>
+            <div className="flex gap-2 mb-4">
+               {['DUTY', 'WORK', 'JOB'].map(t => (
+                 <button 
+                   key={t}
+                   onClick={() => setNewQuest({...newQuest, type: t, reward: t === 'DUTY' ? 0 : newQuest.reward})}
+                   className={`flex-1 py-2 rounded-lg text-xs font-bold ${newQuest.type === t ? 'bg-blue-600' : 'bg-slate-800'}`}
+                 >
+                   {t}
+                 </button>
+               ))}
+            </div>
+
+            <button onClick={handleAddQuest} className="w-full bg-green-600 py-3 rounded-lg font-bold">Create Mission</button>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL: PIN PAD --- */}
       {showPinPad && (
         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm text-center border border-slate-700">
@@ -233,20 +295,38 @@ export default function MaranBrotherhoodReal() {
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <h1 className="text-center text-3xl font-black italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-6">MARAN BROTHERHOOD</h1>
             
-            {/* DHARMA CARD */}
+            {/* REALISTIC DHARMA CARD */}
             <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800">
                <h2 className="text-sm font-bold text-slate-400 uppercase mb-4 flex gap-2"><Shield size={16} className="text-blue-400"/> Daily Dharma (Zero Pay)</h2>
-               <div className="grid grid-cols-2 gap-3">
-                 <button onClick={() => toggleDharma('bed')} className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 ${activeKid.dharma.bed ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
-                   <span className="text-xs font-bold uppercase">Make Bed</span>
+               
+               <div className="space-y-3">
+                 {/* BED (ORDER) */}
+                 <button onClick={() => toggleDharma('bed')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between ${activeKid.dharma.bed ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
+                   <div className="text-left">
+                     <span className="text-xs font-bold uppercase block">1. Order</span>
+                     <span className="text-[10px] opacity-70">Bed Made & Bag Packed</span>
+                   </div>
                    {activeKid.dharma.bed ? <CheckCircle size={24} /> : <div className="h-6 w-6 rounded-full border-2 border-slate-600"/>}
                  </button>
-                 <button onClick={() => toggleDharma('plate')} className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 ${activeKid.dharma.plate ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
-                   <span className="text-xs font-bold uppercase">Clean Plate</span>
+
+                 {/* PLATE (MANNERS) */}
+                 <button onClick={() => toggleDharma('plate')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between ${activeKid.dharma.plate ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
+                   <div className="text-left">
+                     <span className="text-xs font-bold uppercase block">2. Manners</span>
+                     <span className="text-[10px] opacity-70">Clean Plate & Uniform Hung</span>
+                   </div>
                    {activeKid.dharma.plate ? <CheckCircle size={24} /> : <div className="h-6 w-6 rounded-full border-2 border-slate-600"/>}
                  </button>
+
+                 {/* TEETH (HYGIENE) */}
+                 <button onClick={() => toggleDharma('teeth')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between ${(activeKid.dharma as any).teeth ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
+                   <div className="text-left">
+                     <span className="text-xs font-bold uppercase block">3. Hygiene</span>
+                     <span className="text-[10px] opacity-70">Brushed Teeth & Shower</span>
+                   </div>
+                   {(activeKid.dharma as any).teeth ? <CheckCircle size={24} /> : <div className="h-6 w-6 rounded-full border-2 border-slate-600"/>}
+                 </button>
                </div>
-               <p className="text-[10px] text-center text-slate-600 mt-3">"We do these because we are Family, not for money."</p>
             </div>
           </div>
         )}
@@ -254,6 +334,14 @@ export default function MaranBrotherhoodReal() {
         {/* TABS: WORK */}
         {activeTab === 'WORK' && (
            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
+              
+              {/* ADD BUTTON (PARENT ONLY) */}
+              {isParentMode && (
+                <button onClick={() => setShowAddQuest(true)} className="w-full border-2 border-dashed border-slate-700 p-3 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-900 hover:text-white transition mb-4">
+                  <Plus size={20} /> <span className="font-bold">Add New Mission</span>
+                </button>
+              )}
+
               {quests.map(q => (
                 <div key={q.id} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
                    <div className="flex items-center gap-4">
@@ -263,29 +351,30 @@ export default function MaranBrotherhoodReal() {
                         <p className="text-[10px] text-slate-500">{q.desc}</p>
                         <div className="flex gap-2 mt-1">
                            <span className={`text-[10px] px-2 rounded font-bold ${q.reward > 0 ? 'bg-yellow-500/20 text-yellow-500' : 'bg-slate-700 text-slate-400'}`}>
-                             {q.reward > 0 ? `₹${q.reward}` : 'No Pay'}
+                             {q.reward > 0 ? `₹${q.reward}` : 'Duty'}
                            </span>
                            <span className="text-[10px] text-blue-400 font-bold bg-blue-500/20 px-2 rounded">+{q.xp} XP</span>
                         </div>
                       </div>
                    </div>
                    {isParentMode ? (
-                     <button onClick={() => { updateStat(activeKid.id, 'credits', q.reward); updateStat(activeKid.id, 'xp', q.xp); }} className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg font-bold text-xs">Approve</button>
+                     <div className="flex items-center gap-2">
+                       <button onClick={() => handleDeleteQuest(q.id)} className="bg-slate-800 text-slate-600 p-2 rounded-lg hover:text-red-500"><Trash2 size={16}/></button>
+                       <button onClick={() => { updateStat(activeKid.id, 'credits', q.reward); updateStat(activeKid.id, 'xp', q.xp); }} className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg font-bold text-xs">Approve</button>
+                     </div>
                    ) : <Lock size={16} className="text-slate-600"/>}
                 </div>
               ))}
            </div>
         )}
 
-        {/* TABS: SOUL (GRATITUDE) */}
+        {/* TABS: SOUL */}
         {activeTab === 'SOUL' && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <div className="bg-teal-950/30 border border-teal-900/50 p-6 rounded-2xl text-center mb-6">
               <Heart className="mx-auto text-teal-400 mb-2" size={32} />
               <h2 className="text-xl font-serif text-teal-200">Gratitude Journal</h2>
-              <p className="text-xs text-teal-500/70 mt-1 italic">"{activePrompt}"</p>
             </div>
-
             {/* NEW ENTRY INPUT */}
             <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 mb-6">
                <textarea 
@@ -305,28 +394,22 @@ export default function MaranBrotherhoodReal() {
                      </button>
                    ))}
                  </div>
-                 <button onClick={addSoulLog} className="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold text-xs">Save Memory</button>
+                 <button onClick={addSoulLog} className="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold text-xs">Save</button>
                </div>
             </div>
-
             {/* LOG HISTORY */}
             <div className="space-y-3">
               {soulLogs.filter(l => l.kidId === activeKid.id).map(log => (
                 <div key={log.id} className="bg-slate-900 p-4 rounded-xl border-l-2 border-teal-500">
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-[10px] font-bold text-teal-500 uppercase">{log.mood} • {log.date}</span>
-                    <button onClick={() => setSoulLogs(soulLogs.filter(l => l.id !== log.id))} className="text-slate-600"><Trash2 size={12}/></button>
                   </div>
                   <p className="text-sm text-slate-300 italic">"{log.text}"</p>
                 </div>
               ))}
-              {soulLogs.filter(l => l.kidId === activeKid.id).length === 0 && (
-                <p className="text-center text-slate-600 text-xs mt-4">No memories yet. Add one above!</p>
-              )}
             </div>
           </div>
         )}
-
       </div>
 
       {/* BOTTOM NAV */}
