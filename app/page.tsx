@@ -5,11 +5,11 @@ import {
   Zap, Crown, Heart, Brain, BicepsFlexed, 
   CheckCircle, Lock, Unlock, Flame,
   Trash2, Plus, X, AlertTriangle, RefreshCw,
-  Coins, Sparkles
+  Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.0 ---
-const APP_VERSION = "v9.0 (Ecosystem)";
+// --- CONFIGURATION v9.1 ---
+const APP_VERSION = "v9.1 (Stable)";
 
 const INITIAL_KIDS = [
   { 
@@ -30,7 +30,7 @@ const INITIAL_KIDS = [
   }
 ];
 
-// --- 1. EXPANDED EMOTIONS (EQ) ---
+// --- 1. EMOTIONS (EQ) ---
 const MOODS = [
   { label: 'Happy', icon: '😄', advice: 'Wonderful! Spread that sunshine.' },
   { label: 'Proud', icon: '🤩', advice: 'Great effort! Pat your own back.' },
@@ -40,7 +40,7 @@ const MOODS = [
   { label: 'Scared', icon: '😨', advice: 'Bravery is being scared but doing it anyway.' },
 ];
 
-// --- 2. EXPANDED DOJO (Physical) ---
+// --- 2. DOJO (Physical) ---
 const EXERCISES = [
   { id: 1, name: 'Frog Jumps', xp: 15, str: 5, icon: '🐸', desc: '10 jumps' },
   { id: 2, name: 'Bear Crawl', xp: 15, str: 5, icon: '🐻', desc: 'Across the room' },
@@ -49,7 +49,7 @@ const EXERCISES = [
   { id: 5, name: 'Pushups', xp: 20, str: 10, icon: '💪', desc: '10 reps' },
 ];
 
-// --- 3. EXPANDED GUILD (Behavior + Work) ---
+// --- 3. GUILD (Behavior + Work) ---
 const INITIAL_QUESTS = [
   // SOCIAL & BEHAVIOR (High XP, Low/No Money)
   { id: 1, title: 'Greet a Guest', type: 'SOCIAL', reward: 0, xp: 20, icon: '🤝', desc: 'Look in eye & say Namaste.' },
@@ -263,7 +263,7 @@ export default function MaranEcosystem() {
                    <div className="text-[8px] text-slate-500 uppercase">EQ</div>
                 </div>
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
-                   {/* Battery Check - Red if low */}
+                   {/* Battery Check */}
                    <Battery size={16} className={`mx-auto mb-1 ${activeKid.battery < 30 ? 'text-red-500' : 'text-green-400'}`}/>
                    <div className="text-xs font-bold">{activeKid.battery}%</div>
                    <div className="text-[8px] text-slate-500 uppercase">Energy</div>
