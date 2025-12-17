@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-// FIX: Added 'Battery' explicitly to this list
 import { 
   Zap, Crown, Heart, Brain, BicepsFlexed, 
   CheckCircle, Lock, Unlock, Flame,
@@ -9,8 +8,8 @@ import {
   Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.3 (Import Fix) ---
-const APP_VERSION = "v9.3 (Stable)";
+// --- CONFIGURATION v9.4 (Syntax Fix) ---
+const APP_VERSION = "v9.4 (Stable)";
 
 const INITIAL_KIDS = [
   { 
@@ -73,18 +72,18 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v9_3');
-    const savedQuests = localStorage.getItem('maran_quests_v9_3');
-    const savedLogs = localStorage.getItem('maran_logs_v9_3');
+    const savedKids = localStorage.getItem('maran_kids_v9_4');
+    const savedQuests = localStorage.getItem('maran_quests_v9_4');
+    const savedLogs = localStorage.getItem('maran_logs_v9_4');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v9_3', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v9_3', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v9_3', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v9_4', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v9_4', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v9_4', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
@@ -104,16 +103,11 @@ export default function MaranEcosystem() {
   const updateStat = (id: string, field: string, value: number) => {
     setKids(kids.map(k => {
       if (k.id !== id) return k;
-      
-      // Safety check for dynamic fields
       const currentVal = (k as any)[field] || 0;
       let newVal = currentVal + value;
-      
       if (field === 'battery') newVal = Math.min(100, Math.max(0, newVal));
-      
       let newLevel = k.level;
       if (field === 'xp') newLevel = Math.floor(newVal / 500) + 1;
-      
       return { ...k, [field]: newVal, level: newLevel };
     }));
   };
@@ -258,7 +252,6 @@ export default function MaranEcosystem() {
                    <div className="text-[8px] text-slate-500 uppercase">EQ</div>
                 </div>
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
-                   {/* Battery Check - Red if low */}
                    <Battery size={16} className={`mx-auto mb-1 ${activeKid.battery < 30 ? 'text-red-500' : 'text-green-400'}`}/>
                    <div className="text-xs font-bold">{activeKid.battery}%</div>
                    <div className="text-[8px] text-slate-500 uppercase">Energy</div>
