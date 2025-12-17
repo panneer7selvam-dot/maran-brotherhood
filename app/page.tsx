@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+// FIX: Added 'Battery' explicitly to this list
 import { 
   Zap, Crown, Heart, Brain, BicepsFlexed, 
   CheckCircle, Lock, Unlock, Flame,
@@ -8,8 +9,8 @@ import {
   Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.2 (Build Fix) ---
-const APP_VERSION = "v9.2 (Stable)";
+// --- CONFIGURATION v9.3 (Import Fix) ---
+const APP_VERSION = "v9.3 (Stable)";
 
 const INITIAL_KIDS = [
   { 
@@ -72,18 +73,18 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v9_2');
-    const savedQuests = localStorage.getItem('maran_quests_v9_2');
-    const savedLogs = localStorage.getItem('maran_logs_v9_2');
+    const savedKids = localStorage.getItem('maran_kids_v9_3');
+    const savedQuests = localStorage.getItem('maran_quests_v9_3');
+    const savedLogs = localStorage.getItem('maran_logs_v9_3');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v9_2', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v9_2', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v9_2', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v9_3', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v9_3', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v9_3', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
@@ -100,11 +101,11 @@ export default function MaranEcosystem() {
     if(confirm("RESET ALL DATA?")) { localStorage.clear(); window.location.reload(); }
   };
 
-  // FIX: Using (k as any) to bypass TypeScript strict indexing error
   const updateStat = (id: string, field: string, value: number) => {
     setKids(kids.map(k => {
       if (k.id !== id) return k;
       
+      // Safety check for dynamic fields
       const currentVal = (k as any)[field] || 0;
       let newVal = currentVal + value;
       
@@ -117,7 +118,6 @@ export default function MaranEcosystem() {
     }));
   };
 
-  // FIX: Using (dharma as any) to bypass strict string indexing error
   const toggleDharma = (task: string) => {
     setKids(kids.map(k => {
       if (k.id !== activeKid.id) return k;
@@ -258,6 +258,7 @@ export default function MaranEcosystem() {
                    <div className="text-[8px] text-slate-500 uppercase">EQ</div>
                 </div>
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
+                   {/* Battery Check - Red if low */}
                    <Battery size={16} className={`mx-auto mb-1 ${activeKid.battery < 30 ? 'text-red-500' : 'text-green-400'}`}/>
                    <div className="text-xs font-bold">{activeKid.battery}%</div>
                    <div className="text-[8px] text-slate-500 uppercase">Energy</div>
@@ -276,10 +277,12 @@ export default function MaranEcosystem() {
            </div>
         </div>
 
-        {/* TABS */}
+        {/* --- TABS --- */}
+
+        {/* 1. HERO (Protocol) */}
         {activeTab === 'HERO' && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
-            <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Daily Protocol</h2>
+            <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Daily Protocol (Habits)</h2>
             <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 space-y-3">
               <button onClick={() => toggleDharma('bed')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between transition-all ${(activeKid.dharma as any).bed ? 'bg-green-900/20 border-green-500/50' : 'bg-slate-950 border-slate-800'}`}>
                  <div className="flex items-center gap-3">
@@ -288,6 +291,7 @@ export default function MaranEcosystem() {
                  </div>
                  {(activeKid.dharma as any).bed ? <CheckCircle size={24} className="text-green-500"/> : <div className="h-6 w-6 rounded-full border-2 border-slate-700"/>}
               </button>
+              
               <button onClick={() => toggleDharma('teeth')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between transition-all ${(activeKid.dharma as any).teeth ? 'bg-green-900/20 border-green-500/50' : 'bg-slate-950 border-slate-800'}`}>
                  <div className="flex items-center gap-3">
                     <div className="bg-slate-800 p-2 rounded-lg"><Crown size={18} className="text-yellow-400"/></div>
@@ -299,6 +303,7 @@ export default function MaranEcosystem() {
           </div>
         )}
 
+        {/* 2. DOJO (Body) */}
         {activeTab === 'DOJO' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-2xl text-center mb-6">
@@ -325,12 +330,15 @@ export default function MaranEcosystem() {
            </div>
         )}
 
+        {/* 3. MIND (Soul/EQ) */}
         {activeTab === 'MIND' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl text-center mb-6">
                  <Brain size={32} className="mx-auto text-indigo-400 mb-2"/>
                  <h2 className="text-xl font-black text-indigo-100 uppercase italic">Emotion Lab</h2>
               </div>
+              
+              {/* MOOD GRID */}
               <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-6">
                  <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 text-center">How do you feel?</h3>
                  <div className="grid grid-cols-3 gap-2">
@@ -347,6 +355,8 @@ export default function MaranEcosystem() {
                     </div>
                  )}
               </div>
+
+              {/* JOURNAL */}
               <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                  <h3 className="text-xs font-bold text-slate-500 uppercase mb-3">Memory Vault</h3>
                  <div className="flex gap-2">
@@ -357,13 +367,16 @@ export default function MaranEcosystem() {
            </div>
         )}
 
+        {/* 4. GUILD (Social, Home, Work) */}
         {activeTab === 'GUILD' && (
            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
+              
               {isParentMode && (
                 <button onClick={() => setShowAddQuest(true)} className="w-full border-2 border-dashed border-slate-700 p-3 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-900 hover:text-white transition mb-4">
                   <Plus size={16}/> <span className="font-bold text-xs">Add New Mission</span>
                 </button>
               )}
+              
               {quests.map(q => (
                 <div key={q.id} className={`bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between transition-all ${activeKid.battery < 30 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
                    <div className="flex items-center gap-4">
@@ -373,7 +386,7 @@ export default function MaranEcosystem() {
                         <div className="text-[10px] text-slate-500">{q.desc}</div>
                         <div className="flex gap-2 mt-1">
                            <span className={`text-[10px] px-2 rounded font-bold ${q.reward > 0 ? 'bg-yellow-500/20 text-yellow-500' : 'bg-slate-700 text-slate-400'}`}>{q.reward > 0 ? `₹${q.reward}` : 'Honor'}</span>
-                           <span className="text-[10px] text-blue-400 font-bold bg-blue-500/20 px-2 rounded">+{q.xp} XP</span>
+                           <span className="text-[10px] text-blue-400 font-bold bg-blue-500/20 px-2 rounded">+{q.xp} Wisdom</span>
                         </div>
                       </div>
                    </div>
@@ -385,6 +398,7 @@ export default function MaranEcosystem() {
                    ) : <Lock size={16} className="text-slate-600"/>}
                 </div>
               ))}
+
               {activeKid.battery < 30 && (
                 <div className="text-center text-red-500 text-xs font-bold mt-4 p-3 bg-red-900/20 rounded-lg border border-red-500/50">
                    ⚠️ LOW BATTERY: Missions Locked. Rest Required.
