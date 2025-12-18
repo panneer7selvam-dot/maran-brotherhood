@@ -8,8 +8,8 @@ import {
   Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.4 (Syntax Fix) ---
-const APP_VERSION = "v9.4 (Stable)";
+// --- CONFIGURATION v9.5 (Transaction Fix) ---
+const APP_VERSION = "v9.5 (Stable)";
 
 const INITIAL_KIDS = [
   { 
@@ -72,18 +72,18 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v9_4');
-    const savedQuests = localStorage.getItem('maran_quests_v9_4');
-    const savedLogs = localStorage.getItem('maran_logs_v9_4');
+    const savedKids = localStorage.getItem('maran_kids_v9_5');
+    const savedQuests = localStorage.getItem('maran_quests_v9_5');
+    const savedLogs = localStorage.getItem('maran_logs_v9_5');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v9_4', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v9_4', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v9_4', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v9_5', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v9_5', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v9_5', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
@@ -100,20 +100,32 @@ export default function MaranEcosystem() {
     if(confirm("RESET ALL DATA?")) { localStorage.clear(); window.location.reload(); }
   };
 
-  const updateStat = (id: string, field: string, value: number) => {
-    setKids(kids.map(k => {
-      if (k.id !== id) return k;
-      const currentVal = (k as any)[field] || 0;
-      let newVal = currentVal + value;
-      if (field === 'battery') newVal = Math.min(100, Math.max(0, newVal));
-      let newLevel = k.level;
-      if (field === 'xp') newLevel = Math.floor(newVal / 500) + 1;
-      return { ...k, [field]: newVal, level: newLevel };
+  // --- CORE TRANSACTION LOGIC (The Fix) ---
+  // We use 'prev' to ensure we always have the latest state, ensuring no updates are lost.
+  const updateKidStat = (kidId: string, updates: { [key: string]: number }) => {
+    setKids(prevKids => prevKids.map(k => {
+      if (k.id !== kidId) return k;
+
+      const newKid = { ...k } as any;
+
+      // Apply all updates in one loop
+      Object.entries(updates).forEach(([key, value]) => {
+         const current = newKid[key] || 0;
+         newKid[key] = current + value;
+         
+         // Cap Battery
+         if (key === 'battery') newKid[key] = Math.min(100, Math.max(0, newKid[key]));
+      });
+
+      // Recalculate Level based on new XP
+      newKid.level = Math.floor(newKid.xp / 500) + 1;
+
+      return newKid;
     }));
   };
 
   const toggleDharma = (task: string) => {
-    setKids(kids.map(k => {
+    setKids(prevKids => prevKids.map(k => {
       if (k.id !== activeKid.id) return k;
       const d = k.dharma as any;
       return { ...k, dharma: { ...d, [task]: !d[task] } };
@@ -133,7 +145,7 @@ export default function MaranEcosystem() {
 
   const handleMoodSelect = (mood: any) => {
     setCurrentMoodAdvice(mood.advice);
-    updateStat(activeKid.id, 'eq', 5);
+    updateKidStat(activeKid.id, { eq: 5 });
     setTimeout(() => setCurrentMoodAdvice(null), 6000);
   };
 
@@ -142,7 +154,7 @@ export default function MaranEcosystem() {
     const log = { id: Date.now(), kidId: activeKid.id, text: newLog, mood: 'Log', date: new Date().toLocaleDateString() };
     setSoulLogs([log, ...soulLogs]);
     setNewLog('');
-    updateStat(activeKid.id, 'eq', 10);
+    updateKidStat(activeKid.id, { eq: 10 });
   };
 
   const getEvolvedAvatar = (base: string, level: number) => {
@@ -252,6 +264,7 @@ export default function MaranEcosystem() {
                    <div className="text-[8px] text-slate-500 uppercase">EQ</div>
                 </div>
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
+                   {/* Battery Check - Red if low */}
                    <Battery size={16} className={`mx-auto mb-1 ${activeKid.battery < 30 ? 'text-red-500' : 'text-green-400'}`}/>
                    <div className="text-xs font-bold">{activeKid.battery}%</div>
                    <div className="text-[8px] text-slate-500 uppercase">Energy</div>
@@ -261,9 +274,9 @@ export default function MaranEcosystem() {
              {isParentMode && (
                <div className="space-y-2 pt-2 border-t border-slate-800">
                  <div className="flex gap-2">
-                    <button onClick={() => updateStat(activeKid.id, 'battery', -20)} className="flex-1 bg-red-900/40 text-red-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><AlertTriangle size={10}/> Drain</button>
-                    <button onClick={() => updateStat(activeKid.id, 'battery', 20)} className="flex-1 bg-green-900/40 text-green-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Zap size={10}/> Boost</button>
-                    <button onClick={() => updateStat(activeKid.id, 'streak', 1)} className="flex-1 bg-orange-900/40 text-orange-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Flame size={10}/> Streak</button>
+                    <button onClick={() => updateKidStat(activeKid.id, { battery: -20 })} className="flex-1 bg-red-900/40 text-red-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><AlertTriangle size={10}/> Drain</button>
+                    <button onClick={() => updateKidStat(activeKid.id, { battery: 20 })} className="flex-1 bg-green-900/40 text-green-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Zap size={10}/> Boost</button>
+                    <button onClick={() => updateKidStat(activeKid.id, { streak: 1 })} className="flex-1 bg-orange-900/40 text-orange-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Flame size={10}/> Streak</button>
                  </div>
                </div>
              )}
@@ -315,7 +328,8 @@ export default function MaranEcosystem() {
                           <span className="text-blue-400">+{ex.xp} XP</span>
                        </div>
                        {isParentMode ? (
-                         <button onClick={() => { updateStat(activeKid.id, 'str', ex.str); updateStat(activeKid.id, 'xp', ex.xp); }} className="mt-3 w-full bg-red-600 text-white text-[10px] font-bold py-2 rounded">Verify</button>
+                         // FIX: Single Transaction Update
+                         <button onClick={() => updateKidStat(activeKid.id, { str: ex.str, xp: ex.xp })} className="mt-3 w-full bg-red-600 text-white text-[10px] font-bold py-2 rounded">Verify</button>
                        ) : <div className="mt-3 w-full bg-slate-800 text-slate-600 text-[10px] font-bold py-2 rounded text-center">Ask Dad</div>}
                     </div>
                  ))}
@@ -386,7 +400,8 @@ export default function MaranEcosystem() {
                    {isParentMode ? (
                      <div className="flex gap-1">
                         <button onClick={() => handleDeleteQuest(q.id)} className="p-2 text-slate-600 hover:text-red-500"><Trash2 size={16}/></button>
-                        <button onClick={() => { updateStat(activeKid.id, 'credits', q.reward); updateStat(activeKid.id, 'xp', q.xp); }} className="bg-green-600 text-white px-3 py-1 rounded-lg font-bold text-xs">Verify</button>
+                        {/* FIX: Single Transaction Update */}
+                        <button onClick={() => updateKidStat(activeKid.id, { credits: q.reward, xp: q.xp })} className="bg-green-600 text-white px-3 py-1 rounded-lg font-bold text-xs">Verify</button>
                      </div>
                    ) : <Lock size={16} className="text-slate-600"/>}
                 </div>
