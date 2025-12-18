@@ -8,8 +8,8 @@ import {
   Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.6 (Syntax Verified) ---
-const APP_VERSION = "v9.6 (Stable)";
+// --- CONFIGURATION v9.7 (Build-Proof) ---
+const APP_VERSION = "v9.7 (Stable)";
 
 const INITIAL_KIDS = [
   { 
@@ -31,27 +31,27 @@ const INITIAL_KIDS = [
 const MOODS = [
   { label: 'Happy', icon: '😄', advice: 'Wonderful! Spread that sunshine.' },
   { label: 'Proud', icon: '🤩', advice: 'Great effort! Pat your own back.' },
-  { label: 'Bored', icon: '😐', advice: 'Opportunity! Draw or build something new.' },
+  { label: 'Bored', icon: '😐', advice: 'Opportunity! Create something new.' },
   { label: 'Sad', icon: '😢', advice: 'It is okay. Ask for a hug.' },
-  { label: 'Angry', icon: '😡', advice: 'Protocol: 5 Deep Breaths. Walk away.' },
-  { label: 'Scared', icon: '😨', advice: 'Bravery is being scared but doing it anyway.' },
+  { label: 'Angry', icon: '😡', advice: 'Protocol: 5 Deep Breaths.' },
+  { label: 'Scared', icon: '😨', advice: 'Bravery is action despite fear.' },
 ];
 
 const EXERCISES = [
   { id: 1, name: 'Frog Jumps', xp: 15, str: 5, icon: '🐸', desc: '10 jumps' },
-  { id: 2, name: 'Bear Crawl', xp: 15, str: 5, icon: '🐻', desc: 'Across the room' },
-  { id: 3, name: 'Flamingo Balance', xp: 10, str: 5, icon: '🦩', desc: '30s per leg' },
-  { id: 4, name: 'Super Stretch', xp: 10, str: 2, icon: '🧘', desc: 'Touch toes' },
+  { id: 2, name: 'Bear Crawl', xp: 15, str: 5, icon: '🐻', desc: 'Across room' },
+  { id: 3, name: 'Flamingo', xp: 10, str: 5, icon: '🦩', desc: '30s balance' },
+  { id: 4, name: 'Stretch', xp: 10, str: 2, icon: '🧘', desc: 'Touch toes' },
   { id: 5, name: 'Pushups', xp: 20, str: 10, icon: '💪', desc: '10 reps' },
 ];
 
 const INITIAL_QUESTS = [
-  { id: 1, title: 'Greet a Guest', type: 'SOCIAL', reward: 0, xp: 20, icon: '🤝', desc: 'Look in eye & say Namaste.' },
-  { id: 2, title: 'Share w/ Brother', type: 'SOCIAL', reward: 0, xp: 30, icon: '🤲', desc: 'No fighting over toys.' },
-  { id: 3, title: 'Shoes in Rack', type: 'HOME', reward: 0, xp: 10, icon: '👟', desc: 'Keep entrance clean.' },
-  { id: 4, title: 'Fold Laundry', type: 'WORK', reward: 5, xp: 10, icon: '👕', desc: 'Fold 10 items.' },
+  { id: 1, title: 'Greet Guest', type: 'SOCIAL', reward: 0, xp: 20, icon: '🤝', desc: 'Say Namaste.' },
+  { id: 2, title: 'Share Toy', type: 'SOCIAL', reward: 0, xp: 30, icon: '🤲', desc: 'No fighting.' },
+  { id: 3, title: 'Shoes in Rack', type: 'HOME', reward: 0, xp: 10, icon: '👟', desc: 'Keep clean.' },
+  { id: 4, title: 'Fold Laundry', type: 'WORK', reward: 5, xp: 10, icon: '👕', desc: '10 items.' },
   { id: 5, title: 'Water Plants', type: 'WORK', reward: 5, xp: 5, icon: '🌱', desc: 'Garden duty.' },
-  { id: 6, title: 'Wash Vehicle', type: 'JOB', reward: 20, xp: 50, icon: '🚗', desc: 'Soap & Water clean.' },
+  { id: 6, title: 'Wash Vehicle', type: 'JOB', reward: 20, xp: 50, icon: '🚗', desc: 'Full wash.' },
 ];
 
 export default function MaranEcosystem() {
@@ -72,21 +72,23 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v9_6');
-    const savedQuests = localStorage.getItem('maran_quests_v9_6');
-    const savedLogs = localStorage.getItem('maran_logs_v9_6');
+    const savedKids = localStorage.getItem('maran_kids_v9_7');
+    const savedQuests = localStorage.getItem('maran_quests_v9_7');
+    const savedLogs = localStorage.getItem('maran_logs_v9_7');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v9_6', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v9_6', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v9_6', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v9_7', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v9_7', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v9_7', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
+  // Safe helper for dharma to avoid TS errors in JSX
+  const currentDharma = activeKid.dharma as any;
 
   const handlePinSubmit = () => {
     if (pinInput === '1234') { 
@@ -103,15 +105,12 @@ export default function MaranEcosystem() {
   const updateKidStat = (kidId: string, updates: { [key: string]: number }) => {
     setKids(prevKids => prevKids.map(k => {
       if (k.id !== kidId) return k;
-
       const newKid = { ...k } as any;
-
       Object.entries(updates).forEach(([key, value]) => {
          const current = newKid[key] || 0;
          newKid[key] = current + value;
          if (key === 'battery') newKid[key] = Math.min(100, Math.max(0, newKid[key]));
       });
-
       newKid.level = Math.floor(newKid.xp / 500) + 1;
       return newKid;
     }));
@@ -159,7 +158,7 @@ export default function MaranEcosystem() {
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white pb-28 select-none relative overflow-x-hidden">
       
-      {/* ADD MISSION MODAL */}
+      {/* --- ADD MISSION MODAL --- */}
       {showAddQuest && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-700">
@@ -167,7 +166,7 @@ export default function MaranEcosystem() {
                <h2 className="text-xl font-bold">New Mission</h2>
                <button onClick={() => setShowAddQuest(false)}><X size={20}/></button>
              </div>
-             <input className="w-full bg-slate-800 p-3 rounded-lg mb-3 border border-slate-700" placeholder="Title (e.g. Say Thank You)" value={newQuest.title} onChange={e => setNewQuest({...newQuest, title: e.target.value})} />
+             <input className="w-full bg-slate-800 p-3 rounded-lg mb-3 border border-slate-700" placeholder="Title" value={newQuest.title} onChange={e => setNewQuest({...newQuest, title: e.target.value})} />
              <div className="flex gap-2 mb-3">
                <div className="w-1/2">
                  <label className="text-[10px] text-slate-500 font-bold uppercase">Rupees (₹)</label>
@@ -188,7 +187,7 @@ export default function MaranEcosystem() {
         </div>
       )}
 
-      {/* PIN PAD */}
+      {/* --- PIN PAD --- */}
       {showPinPad && (
         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm text-center border border-slate-700">
@@ -203,7 +202,7 @@ export default function MaranEcosystem() {
         </div>
       )}
 
-      {/* TOP BAR */}
+      {/* --- TOP BAR --- */}
       <div className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50">
         <div className="flex justify-between items-center max-w-lg mx-auto">
           <div className="flex gap-2">
@@ -275,33 +274,33 @@ export default function MaranEcosystem() {
            </div>
         </div>
 
-        {/* --- TABS --- */}
+        {/* --- TABS CONTENT --- */}
 
-        {/* 1. HERO (Protocol) */}
+        {/* 1. HERO TAB */}
         {activeTab === 'HERO' && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
-            <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Daily Protocol (Habits)</h2>
+            <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Daily Protocol</h2>
             <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 space-y-3">
-              <button onClick={() => toggleDharma('bed')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between transition-all ${(activeKid.dharma as any).bed ? 'bg-green-900/20 border-green-500/50' : 'bg-slate-950 border-slate-800'}`}>
+              <button onClick={() => toggleDharma('bed')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between transition-all ${currentDharma.bed ? 'bg-green-900/20 border-green-500/50' : 'bg-slate-950 border-slate-800'}`}>
                  <div className="flex items-center gap-3">
                     <div className="bg-slate-800 p-2 rounded-lg"><Crown size={18} className="text-yellow-400"/></div>
                     <div className="text-left"><div className="text-sm font-bold">Order</div><div className="text-[10px] text-slate-500">Make Bed / Pack Bag</div></div>
                  </div>
-                 {(activeKid.dharma as any).bed ? <CheckCircle size={24} className="text-green-500"/> : <div className="h-6 w-6 rounded-full border-2 border-slate-700"/>}
+                 {currentDharma.bed ? <CheckCircle size={24} className="text-green-500"/> : <div className="h-6 w-6 rounded-full border-2 border-slate-700"/>}
               </button>
               
-              <button onClick={() => toggleDharma('teeth')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between transition-all ${(activeKid.dharma as any).teeth ? 'bg-green-900/20 border-green-500/50' : 'bg-slate-950 border-slate-800'}`}>
+              <button onClick={() => toggleDharma('teeth')} className={`w-full p-3 rounded-xl border-2 flex items-center justify-between transition-all ${currentDharma.teeth ? 'bg-green-900/20 border-green-500/50' : 'bg-slate-950 border-slate-800'}`}>
                  <div className="flex items-center gap-3">
                     <div className="bg-slate-800 p-2 rounded-lg"><Crown size={18} className="text-yellow-400"/></div>
                     <div className="text-left"><div className="text-sm font-bold">Hygiene</div><div className="text-[10px] text-slate-500">Brush & Bath</div></div>
                  </div>
-                 {(activeKid.dharma as any).teeth ? <CheckCircle size={24} className="text-green-500"/> : <div className="h-6 w-6 rounded-full border-2 border-slate-700"/>}
+                 {currentDharma.teeth ? <CheckCircle size={24} className="text-green-500"/> : <div className="h-6 w-6 rounded-full border-2 border-slate-700"/>}
               </button>
             </div>
           </div>
         )}
 
-        {/* 2. DOJO (Body) */}
+        {/* 2. DOJO TAB */}
         {activeTab === 'DOJO' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-2xl text-center mb-6">
@@ -328,7 +327,7 @@ export default function MaranEcosystem() {
            </div>
         )}
 
-        {/* 3. MIND (Soul/EQ) */}
+        {/* 3. MIND TAB */}
         {activeTab === 'MIND' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl text-center mb-6">
@@ -336,7 +335,6 @@ export default function MaranEcosystem() {
                  <h2 className="text-xl font-black text-indigo-100 uppercase italic">Emotion Lab</h2>
               </div>
               
-              {/* MOOD GRID */}
               <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-6">
                  <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 text-center">How do you feel?</h3>
                  <div className="grid grid-cols-3 gap-2">
@@ -354,7 +352,6 @@ export default function MaranEcosystem() {
                  )}
               </div>
 
-              {/* JOURNAL */}
               <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                  <h3 className="text-xs font-bold text-slate-500 uppercase mb-3">Memory Vault</h3>
                  <div className="flex gap-2">
@@ -365,7 +362,7 @@ export default function MaranEcosystem() {
            </div>
         )}
 
-        {/* 4. GUILD (Social, Home, Work) */}
+        {/* 4. GUILD TAB */}
         {activeTab === 'GUILD' && (
            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
               
@@ -405,6 +402,7 @@ export default function MaranEcosystem() {
            </div>
         )}
       
+      {/* --- FOOTER --- */}
       {isParentMode && (
           <div className="text-center mt-10 opacity-50 pb-4">
               <button onClick={factoryReset} className="text-[10px] text-red-500 flex items-center justify-center gap-1 mx-auto border border-red-900 p-2 rounded hover:bg-red-900/20">
@@ -414,7 +412,9 @@ export default function MaranEcosystem() {
           </div>
       )}
 
-      {/* BOTTOM NAV */}
+      </div>
+
+      {/* --- BOTTOM NAV --- */}
       <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md border border-slate-700 p-2 rounded-2xl flex justify-between shadow-2xl z-50">
         {[
           { id: 'HERO', icon: <Crown size={20} />, label: 'Hero' },
