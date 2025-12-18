@@ -8,8 +8,8 @@ import {
   Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.5 (Transaction Fix) ---
-const APP_VERSION = "v9.5 (Stable)";
+// --- CONFIGURATION v9.6 (Syntax Verified) ---
+const APP_VERSION = "v9.6 (Stable)";
 
 const INITIAL_KIDS = [
   { 
@@ -72,18 +72,18 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v9_5');
-    const savedQuests = localStorage.getItem('maran_quests_v9_5');
-    const savedLogs = localStorage.getItem('maran_logs_v9_5');
+    const savedKids = localStorage.getItem('maran_kids_v9_6');
+    const savedQuests = localStorage.getItem('maran_quests_v9_6');
+    const savedLogs = localStorage.getItem('maran_logs_v9_6');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v9_5', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v9_5', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v9_5', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v9_6', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v9_6', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v9_6', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
@@ -100,26 +100,19 @@ export default function MaranEcosystem() {
     if(confirm("RESET ALL DATA?")) { localStorage.clear(); window.location.reload(); }
   };
 
-  // --- CORE TRANSACTION LOGIC (The Fix) ---
-  // We use 'prev' to ensure we always have the latest state, ensuring no updates are lost.
   const updateKidStat = (kidId: string, updates: { [key: string]: number }) => {
     setKids(prevKids => prevKids.map(k => {
       if (k.id !== kidId) return k;
 
       const newKid = { ...k } as any;
 
-      // Apply all updates in one loop
       Object.entries(updates).forEach(([key, value]) => {
          const current = newKid[key] || 0;
          newKid[key] = current + value;
-         
-         // Cap Battery
          if (key === 'battery') newKid[key] = Math.min(100, Math.max(0, newKid[key]));
       });
 
-      // Recalculate Level based on new XP
       newKid.level = Math.floor(newKid.xp / 500) + 1;
-
       return newKid;
     }));
   };
@@ -264,7 +257,6 @@ export default function MaranEcosystem() {
                    <div className="text-[8px] text-slate-500 uppercase">EQ</div>
                 </div>
                 <div className="bg-slate-800 p-2 rounded-xl text-center border border-slate-700">
-                   {/* Battery Check - Red if low */}
                    <Battery size={16} className={`mx-auto mb-1 ${activeKid.battery < 30 ? 'text-red-500' : 'text-green-400'}`}/>
                    <div className="text-xs font-bold">{activeKid.battery}%</div>
                    <div className="text-[8px] text-slate-500 uppercase">Energy</div>
@@ -328,7 +320,6 @@ export default function MaranEcosystem() {
                           <span className="text-blue-400">+{ex.xp} XP</span>
                        </div>
                        {isParentMode ? (
-                         // FIX: Single Transaction Update
                          <button onClick={() => updateKidStat(activeKid.id, { str: ex.str, xp: ex.xp })} className="mt-3 w-full bg-red-600 text-white text-[10px] font-bold py-2 rounded">Verify</button>
                        ) : <div className="mt-3 w-full bg-slate-800 text-slate-600 text-[10px] font-bold py-2 rounded text-center">Ask Dad</div>}
                     </div>
@@ -400,7 +391,6 @@ export default function MaranEcosystem() {
                    {isParentMode ? (
                      <div className="flex gap-1">
                         <button onClick={() => handleDeleteQuest(q.id)} className="p-2 text-slate-600 hover:text-red-500"><Trash2 size={16}/></button>
-                        {/* FIX: Single Transaction Update */}
                         <button onClick={() => updateKidStat(activeKid.id, { credits: q.reward, xp: q.xp })} className="bg-green-600 text-white px-3 py-1 rounded-lg font-bold text-xs">Verify</button>
                      </div>
                    ) : <Lock size={16} className="text-slate-600"/>}
