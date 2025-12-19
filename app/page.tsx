@@ -5,11 +5,11 @@ import {
   Zap, Crown, Heart, Brain, BicepsFlexed, 
   CheckCircle, Lock, Unlock, Flame,
   Trash2, Plus, X, AlertTriangle, RefreshCw,
-  Sparkles, Battery
+  Sparkles, Battery, Coins
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.7 (Build-Proof) ---
-const APP_VERSION = "v9.7 (Stable)";
+// --- CONFIGURATION v9.8 (Button Fixes) ---
+const APP_VERSION = "v9.8 (Stable)";
 
 const INITIAL_KIDS = [
   { 
@@ -72,22 +72,21 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v9_7');
-    const savedQuests = localStorage.getItem('maran_quests_v9_7');
-    const savedLogs = localStorage.getItem('maran_logs_v9_7');
+    const savedKids = localStorage.getItem('maran_kids_v9_8');
+    const savedQuests = localStorage.getItem('maran_quests_v9_8');
+    const savedLogs = localStorage.getItem('maran_logs_v9_8');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v9_7', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v9_7', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v9_7', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v9_8', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v9_8', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v9_8', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
-  // Safe helper for dharma to avoid TS errors in JSX
   const currentDharma = activeKid.dharma as any;
 
   const handlePinSubmit = () => {
@@ -102,6 +101,7 @@ export default function MaranEcosystem() {
     if(confirm("RESET ALL DATA?")) { localStorage.clear(); window.location.reload(); }
   };
 
+  // --- CORE UPDATE LOGIC ---
   const updateKidStat = (kidId: string, updates: { [key: string]: number }) => {
     setKids(prevKids => prevKids.map(k => {
       if (k.id !== kidId) return k;
@@ -158,7 +158,7 @@ export default function MaranEcosystem() {
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white pb-28 select-none relative overflow-x-hidden">
       
-      {/* --- ADD MISSION MODAL --- */}
+      {/* ADD MISSION MODAL */}
       {showAddQuest && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-700">
@@ -187,7 +187,7 @@ export default function MaranEcosystem() {
         </div>
       )}
 
-      {/* --- PIN PAD --- */}
+      {/* PIN PAD */}
       {showPinPad && (
         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm text-center border border-slate-700">
@@ -202,7 +202,7 @@ export default function MaranEcosystem() {
         </div>
       )}
 
-      {/* --- TOP BAR --- */}
+      {/* TOP BAR */}
       <div className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50">
         <div className="flex justify-between items-center max-w-lg mx-auto">
           <div className="flex gap-2">
@@ -262,21 +262,26 @@ export default function MaranEcosystem() {
                 </div>
              </div>
 
+             {/* ADMIN MANUAL CONTROLS (RESTORED) */}
              {isParentMode && (
                <div className="space-y-2 pt-2 border-t border-slate-800">
+                 <div className="text-[10px] text-slate-500 text-center font-bold uppercase">Manual Adjustments</div>
+                 <div className="grid grid-cols-4 gap-1">
+                    <button onClick={() => updateKidStat(activeKid.id, { credits: 10 })} className="bg-yellow-500/20 text-yellow-300 text-[10px] font-bold py-2 rounded">+₹10</button>
+                    <button onClick={() => updateKidStat(activeKid.id, { xp: 50 })} className="bg-blue-500/20 text-blue-300 text-[10px] font-bold py-2 rounded">+XP</button>
+                    <button onClick={() => updateKidStat(activeKid.id, { str: 5 })} className="bg-red-500/20 text-red-300 text-[10px] font-bold py-2 rounded">+Str</button>
+                    <button onClick={() => updateKidStat(activeKid.id, { eq: 5 })} className="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold py-2 rounded">+EQ</button>
+                 </div>
                  <div className="flex gap-2">
                     <button onClick={() => updateKidStat(activeKid.id, { battery: -20 })} className="flex-1 bg-red-900/40 text-red-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><AlertTriangle size={10}/> Drain</button>
                     <button onClick={() => updateKidStat(activeKid.id, { battery: 20 })} className="flex-1 bg-green-900/40 text-green-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Zap size={10}/> Boost</button>
-                    <button onClick={() => updateKidStat(activeKid.id, { streak: 1 })} className="flex-1 bg-orange-900/40 text-orange-300 text-[10px] font-bold py-2 rounded flex items-center justify-center gap-1"><Flame size={10}/> Streak</button>
                  </div>
                </div>
              )}
            </div>
         </div>
 
-        {/* --- TABS CONTENT --- */}
-
-        {/* 1. HERO TAB */}
+        {/* HERO TAB */}
         {activeTab === 'HERO' && (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Daily Protocol</h2>
@@ -300,7 +305,7 @@ export default function MaranEcosystem() {
           </div>
         )}
 
-        {/* 2. DOJO TAB */}
+        {/* DOJO TAB */}
         {activeTab === 'DOJO' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-2xl text-center mb-6">
@@ -327,7 +332,7 @@ export default function MaranEcosystem() {
            </div>
         )}
 
-        {/* 3. MIND TAB */}
+        {/* MIND TAB */}
         {activeTab === 'MIND' && (
            <div className="animate-in fade-in slide-in-from-bottom-2">
               <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl text-center mb-6">
@@ -362,7 +367,7 @@ export default function MaranEcosystem() {
            </div>
         )}
 
-        {/* 4. GUILD TAB */}
+        {/* GUILD TAB */}
         {activeTab === 'GUILD' && (
            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
               
@@ -373,9 +378,9 @@ export default function MaranEcosystem() {
               )}
               
               {quests.map(q => (
-                <div key={q.id} className={`bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between transition-all ${activeKid.battery < 30 ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+                <div key={q.id} className={`bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between transition-all`}>
                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 bg-slate-800 rounded-xl flex items-center justify-center text-2xl border border-slate-700">{q.icon}</div>
+                      <div className={`h-12 w-12 bg-slate-800 rounded-xl flex items-center justify-center text-2xl border border-slate-700 ${activeKid.battery < 30 ? 'grayscale opacity-50' : ''}`}>{q.icon}</div>
                       <div>
                         <h3 className="font-bold text-sm text-white">{q.title}</h3>
                         <div className="text-[10px] text-slate-500">{q.desc}</div>
@@ -390,7 +395,11 @@ export default function MaranEcosystem() {
                         <button onClick={() => handleDeleteQuest(q.id)} className="p-2 text-slate-600 hover:text-red-500"><Trash2 size={16}/></button>
                         <button onClick={() => updateKidStat(activeKid.id, { credits: q.reward, xp: q.xp })} className="bg-green-600 text-white px-3 py-1 rounded-lg font-bold text-xs">Verify</button>
                      </div>
-                   ) : <Lock size={16} className="text-slate-600"/>}
+                   ) : (
+                     <div className="text-slate-600">
+                        {activeKid.battery < 30 ? <Lock size={16} className="text-red-900" /> : <Lock size={16} />}
+                     </div>
+                   )}
                 </div>
               ))}
 
@@ -402,7 +411,7 @@ export default function MaranEcosystem() {
            </div>
         )}
       
-      {/* --- FOOTER --- */}
+      {/* FOOTER */}
       {isParentMode && (
           <div className="text-center mt-10 opacity-50 pb-4">
               <button onClick={factoryReset} className="text-[10px] text-red-500 flex items-center justify-center gap-1 mx-auto border border-red-900 p-2 rounded hover:bg-red-900/20">
@@ -412,9 +421,7 @@ export default function MaranEcosystem() {
           </div>
       )}
 
-      </div>
-
-      {/* --- BOTTOM NAV --- */}
+      {/* BOTTOM NAV */}
       <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur-md border border-slate-700 p-2 rounded-2xl flex justify-between shadow-2xl z-50">
         {[
           { id: 'HERO', icon: <Crown size={20} />, label: 'Hero' },
