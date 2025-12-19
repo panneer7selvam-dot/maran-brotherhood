@@ -8,8 +8,8 @@ import {
   Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v10.0 (Final) ---
-const APP_VERSION = "v10.0 (Final)";
+// --- CONFIGURATION v10.1 (Structure Verified) ---
+const APP_VERSION = "v10.1 (Final)";
 
 const INITIAL_KIDS = [
   { 
@@ -72,22 +72,23 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v10');
-    const savedQuests = localStorage.getItem('maran_quests_v10');
-    const savedLogs = localStorage.getItem('maran_logs_v10');
+    const savedKids = localStorage.getItem('maran_kids_v10_1');
+    const savedQuests = localStorage.getItem('maran_quests_v10_1');
+    const savedLogs = localStorage.getItem('maran_logs_v10_1');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v10', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v10', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v10', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v10_1', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v10_1', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v10_1', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
-  const currentDharma = activeKid.dharma as any;
+  // Helper to safely access dharma
+  const currentDharma = (activeKid.dharma || {}) as any;
 
   const handlePinSubmit = () => {
     if (pinInput === '1234') { 
@@ -261,10 +262,9 @@ export default function MaranEcosystem() {
                 </div>
              </div>
 
-             {/* ADMIN MANUAL CONTROLS */}
+             {/* ADMIN CONTROLS */}
              {isParentMode && (
                <div className="space-y-2 pt-2 border-t border-slate-800">
-                 <div className="text-[10px] text-slate-500 text-center font-bold uppercase">Manual Adjustments</div>
                  <div className="grid grid-cols-4 gap-1">
                     <button onClick={() => updateKidStat(activeKid.id, { credits: 10 })} className="bg-yellow-500/20 text-yellow-300 text-[10px] font-bold py-2 rounded">+₹10</button>
                     <button onClick={() => updateKidStat(activeKid.id, { xp: 50 })} className="bg-blue-500/20 text-blue-300 text-[10px] font-bold py-2 rounded">+XP</button>
