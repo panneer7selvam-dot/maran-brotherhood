@@ -5,11 +5,11 @@ import {
   Zap, Crown, Heart, Brain, BicepsFlexed, 
   CheckCircle, Lock, Unlock, Flame,
   Trash2, Plus, X, AlertTriangle, RefreshCw,
-  Sparkles, Battery, Coins
+  Sparkles, Battery
 } from 'lucide-react';
 
-// --- CONFIGURATION v9.8 (Button Fixes) ---
-const APP_VERSION = "v9.8 (Stable)";
+// --- CONFIGURATION v10.0 (Final) ---
+const APP_VERSION = "v10.0 (Final)";
 
 const INITIAL_KIDS = [
   { 
@@ -72,18 +72,18 @@ export default function MaranEcosystem() {
   const [currentMoodAdvice, setCurrentMoodAdvice] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKids = localStorage.getItem('maran_kids_v9_8');
-    const savedQuests = localStorage.getItem('maran_quests_v9_8');
-    const savedLogs = localStorage.getItem('maran_logs_v9_8');
+    const savedKids = localStorage.getItem('maran_kids_v10');
+    const savedQuests = localStorage.getItem('maran_quests_v10');
+    const savedLogs = localStorage.getItem('maran_logs_v10');
     if (savedKids) setKids(JSON.parse(savedKids));
     if (savedQuests) setQuests(JSON.parse(savedQuests));
     if (savedLogs) setSoulLogs(JSON.parse(savedLogs));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('maran_kids_v9_8', JSON.stringify(kids));
-    localStorage.setItem('maran_quests_v9_8', JSON.stringify(quests));
-    localStorage.setItem('maran_logs_v9_8', JSON.stringify(soulLogs));
+    localStorage.setItem('maran_kids_v10', JSON.stringify(kids));
+    localStorage.setItem('maran_quests_v10', JSON.stringify(quests));
+    localStorage.setItem('maran_logs_v10', JSON.stringify(soulLogs));
   }, [kids, quests, soulLogs]);
 
   const activeKid = kids.find(k => k.id === selectedId) || kids[0];
@@ -101,7 +101,6 @@ export default function MaranEcosystem() {
     if(confirm("RESET ALL DATA?")) { localStorage.clear(); window.location.reload(); }
   };
 
-  // --- CORE UPDATE LOGIC ---
   const updateKidStat = (kidId: string, updates: { [key: string]: number }) => {
     setKids(prevKids => prevKids.map(k => {
       if (k.id !== kidId) return k;
@@ -262,7 +261,7 @@ export default function MaranEcosystem() {
                 </div>
              </div>
 
-             {/* ADMIN MANUAL CONTROLS (RESTORED) */}
+             {/* ADMIN MANUAL CONTROLS */}
              {isParentMode && (
                <div className="space-y-2 pt-2 border-t border-slate-800">
                  <div className="text-[10px] text-slate-500 text-center font-bold uppercase">Manual Adjustments</div>
